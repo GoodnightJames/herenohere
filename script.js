@@ -1,27 +1,56 @@
-// Updated image URLs to the correct public path
 const images = [
-    'https://storage.cloud.google.com/herenohere-intro/1.jpg',
-    'https://storage.cloud.google.com/herenohere-intro/2.jpg',
-    'https://storage.cloud.google.com/herenohere-intro/3.jpg',
-    'https://storage.cloud.google.com/herenohere-intro/4.jpg'
-];
+    'https://github.com/GoodnightJames/herenohere/blob/main/Images/1.jpg?raw=true',
+    'https://github.com/GoodnightJames/herenohere/blob/main/Images/2.jpg?raw=true',
+    'https://github.com/GoodnightJames/herenohere/blob/main/Images/3.jpg?raw=true',
+    'https://github.com/GoodnightJames/herenohere/blob/main/Images/4.jpg?raw=true'
+  ];
+  
 
 let sequenceIndex = 0;
+let direction = 1; // Direction of the sequence; 1 for forward, -1 for backward
 const imageElement = document.getElementById('current-image');
-imageElement.src = images[sequenceIndex]; // Load the first image initially
 
-function updateImage() {
-    sequenceIndex = (sequenceIndex + 1) % images.length;
-    let nextImageSrc = images[sequenceIndex];
-    
-    let newImage = new Image();
-    newImage.onload = () => {
-        imageElement.src = nextImageSrc;
-        setTimeout(() => {
-            imageElement.style.opacity = 1;
-        }, 250); // Start fading in the new image before the old one completely fades out
-    };
-    newImage.src = nextImageSrc;
+function preloadImages(urls, allImagesLoadedCallback) {
+    let loadedCounter = 0;
+    let toBeLoadedNumber = urls.length;
+    urls.forEach(function(url) {
+        let img = new Image();
+        img.onload = function() {
+            loadedCounter++;
+            if (loadedCounter === toBeLoadedNumber) {
+                allImagesLoadedCallback();
+            }
+        };
+        img.src = url;
+    });
 }
 
-setInterval(updateImage, 1500); // Update the image every second
+function updateImage() {
+    sequenceIndex += direction;
+    
+    // Reverse direction at the ends of the sequence
+    if (sequenceIndex >= images.length - 1 || sequenceIndex <= 0) {
+        direction *= -1;
+    }
+    
+    // Start loading next image
+    let nextImageSrc = images[sequenceIndex];
+    let newImage = new Image();
+    newImage.onload = function() {
+        // Swap the image source
+        imageElement.src = nextImageSrc;
+    };
+    newImage.src = nextImageSrc;
+    
+    // Fade out and in
+    imageElement.classList.add('fade');
+    setTimeout(() => {
+        imageElement.classList.remove('fade');
+    }, 500); // Corresponds to the CSS transition duration
+}
+
+preloadImages(images, function() {
+    imageElement.src = images[0]; // Load the first image initially
+    imageElement.classList.remove('fade');
+    setInterval(updateImage, 2000); // Update the image every 2 seconds
+});
