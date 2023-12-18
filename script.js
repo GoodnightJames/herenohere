@@ -1,23 +1,23 @@
 const images = [
-    'https://github.com/GoodnightJames/herenohere/blob/main/Images/1.jpg?raw=true',
-    'https://github.com/GoodnightJames/herenohere/blob/main/Images/2.jpg?raw=true',
-    'https://github.com/GoodnightJames/herenohere/blob/main/Images/3.jpg?raw=true',
-    'https://github.com/GoodnightJames/herenohere/blob/main/Images/4.jpg?raw=true'
-  ];
-  
+    'https://github.com/GoodnightJames/herenohere/blob/main/Images/01.jpg?raw=true',
+    'https://github.com/GoodnightJames/herenohere/blob/main/Images/02.jpg?raw=true',
+    'https://github.com/GoodnightJames/herenohere/blob/main/Images/03.jpg?raw=true',
+    // Assuming 5 and 6 are also in the Images folder
+    'https://github.com/GoodnightJames/herenohere/blob/main/Images/04.jpg?raw=true',
+    'https://github.com/GoodnightJames/herenohere/blob/main/Images/05.jpg?raw=true',
+    'https://github.com/GoodnightJames/herenohere/blob/main/Images/06.jpg?raw=true',
+];
 
-let sequenceIndex = 0;
-let direction = 1; // Direction of the sequence; 1 for forward, -1 for backward
+let sequenceIndex = 0; // Start with the first image
 const imageElement = document.getElementById('current-image');
 
 function preloadImages(urls, allImagesLoadedCallback) {
     let loadedCounter = 0;
-    let toBeLoadedNumber = urls.length;
     urls.forEach(function(url) {
         let img = new Image();
         img.onload = function() {
             loadedCounter++;
-            if (loadedCounter === toBeLoadedNumber) {
+            if (loadedCounter === urls.length) {
                 allImagesLoadedCallback();
             }
         };
@@ -25,24 +25,29 @@ function preloadImages(urls, allImagesLoadedCallback) {
     });
 }
 
-function updateImage() {
-    sequenceIndex += direction;
-    
-    // Reverse direction at the ends of the sequence
-    if (sequenceIndex >= images.length - 1 || sequenceIndex <= 0) {
-        direction *= -1;
+function getNextIndex() {
+    // Increment or decrement the sequenceIndex based on the current image and sequence
+    if (sequenceIndex === 2) {
+        sequenceIndex++;
+    } else if (sequenceIndex === 5) {
+        sequenceIndex -= 2;
+    } else if (sequenceIndex === 3 && direction === -1) {
+        sequenceIndex--;
+    } else {
+        sequenceIndex += direction;
     }
+}
+
+function updateImage() {
+    getNextIndex();
     
-    // Start loading next image
     let nextImageSrc = images[sequenceIndex];
     let newImage = new Image();
     newImage.onload = function() {
-        // Swap the image source
         imageElement.src = nextImageSrc;
     };
     newImage.src = nextImageSrc;
     
-    // Fade out and in
     imageElement.classList.add('fade');
     setTimeout(() => {
         imageElement.classList.remove('fade');
